@@ -1,0 +1,9 @@
+[package]
+name = "chicchaidb"
+version = "0.1.0"
+authors = ["sueken5 <sueken0117@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+serde = { version = "1.0.88", features = ["derive"] }
+bincode = "1.1.2"
