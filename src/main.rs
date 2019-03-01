@@ -1,4 +1,3 @@
-use std::error::Error;
 mod btree;
 use btree::Btree;
 
@@ -24,5 +23,10 @@ fn main() {
         println!("value: {}", v);
     }
 
-    println!("fin")
+    if let Err(e) = btree.close() {
+        println!("err {}", e);
+        return;
+    }
+
+    println!("good bye!")
 }

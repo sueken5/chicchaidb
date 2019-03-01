@@ -35,6 +35,15 @@ impl<K: KeyType, V: ValueType> RecordFile<K, V> {
         })
     }
 
+    pub fn is_new(&self) -> Result<bool, Box<Error>> {
+        let l = self.file.metadata()?;
+        if l.len() == 0 {
+           return Ok(true);
+        }
+
+        Ok(false)
+    }
+
     pub fn insert(&mut self, kv: &KeyValuePair<K, V>) -> Result<(), Box<Error>> {
         let record_size = self.key_size + self.value_size;
         let mut buff = serialize(&kv)?;

@@ -49,4 +49,16 @@ impl<K: KeyType, V: ValueType> Btree<K, V> {
     pub fn get(&self, key: K) -> Option<&V> {
         self.mem_btree.get(key)
     }
+
+    fn merge(&mut self) -> Result<(), Box<Error>> {
+        Ok(())
+    }
+
+    pub fn close(&mut self) -> Result<(), Box<Error>> {
+        if let Err(e) = self.merge() {
+            return Err(e);
+        }
+
+        Ok(())
+    }
 }
