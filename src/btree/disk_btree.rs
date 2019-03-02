@@ -9,6 +9,8 @@ use std::marker::PhantomData;
 use std::fs::File;
 use std::io::Write;
 use std::io::Read;
+use std::io::SeekFrom;
+use std::io::prelude::*;
 use std::fs::OpenOptions;
 
 const DB_NAME: &'static str = "chicchaidb";
@@ -21,6 +23,7 @@ const BLOCK_SIZE: usize = 4096;
 ///
 /// + 0 -----------------------------------------------+
 ///  metadata
+/// + 4095 --------------------------------------------+
 /// + 4096 --------------------------------------------+
 /// ...data
 /// +--------------------------------------------------+
@@ -112,6 +115,8 @@ impl<K: KeyType, V: ValueType> DiskBtree<K, V> {
 
     fn metadata(&mut self) -> Result<MetaData, Box<Error>> {
         let mut buff = vec![0; BLOCK_SIZE];
+
+        self.file.seek(SeekFrom::Start(0));
         match self.file.read_exact(&mut buff) {
             Ok(_) => {
                 match deserialize(&buff) {
