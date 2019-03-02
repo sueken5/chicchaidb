@@ -1,13 +1,14 @@
 extern crate serde;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 extern crate bincode;
-use bincode::serialize;
+use bincode::{serialize, deserialize};
 
 use crate::btree::key_value::{KeyType, ValueType};
 use std::error::Error;
 use std::marker::PhantomData;
 use std::fs::File;
 use std::io::Write;
+use std::io::Read;
 use std::fs::OpenOptions;
 
 const DB_NAME: &'static str = "chicchaidb";
@@ -33,7 +34,7 @@ pub struct DiskBtree<K: KeyType, V: ValueType> {
     _value_marker: PhantomData<V>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 struct MetaData {
     name: String,
     version: u8,
@@ -65,6 +66,9 @@ impl<K: KeyType, V: ValueType> DiskBtree<K, V> {
                 return Err(e);
             }
         };
+
+        let meta= b.metadata()?;
+        println!("db name: {}", meta.name);
 
         if is_new {
             if let Err(e) = b.initialize() {
@@ -103,6 +107,21 @@ impl<K: KeyType, V: ValueType> DiskBtree<K, V> {
         match self.file.write_all(&buff) {
             Ok(_) => Ok(()),
             Err(e) => Err(From::from(e)),
+        }
+    }
+
+    fn metadata(&mut self) -> Result<MetaData, Box<Error>> {
+        let mut buff = vec![0; BLOCK_SIZE];
+        match self.file.read_exact(&mut buff) {
+            Ok(_) => {
+                match deserialize(&buff) {
+                    Ok(v) => Ok(v),
+                    Err(e) => Err(e),
+                }
+            },
+            Err(e) => {
+                Err(Box::new(e))
+            }
         }
     }
 
