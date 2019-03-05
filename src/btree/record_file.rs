@@ -7,20 +7,20 @@ extern crate bincode;
 use bincode::serialize;
 use std::marker::PhantomData;
 
-pub struct RecordFile<K: KeyType, V: ValueType> {
+pub struct RecordFile<'d, K: KeyType<'d>, V: ValueType<'d>> {
     file: File,
     key_size: usize,
     value_size: usize,
-    _key_marker: PhantomData<K>,
-    _value_marker: PhantomData<V>,
+    _key_marker: PhantomData<&'d K>,
+    _value_marker: PhantomData<&'d V>,
 }
 
-impl<K: KeyType, V: ValueType> RecordFile<K, V> {
+impl<'d, K: KeyType<'d>, V: ValueType<'d>> RecordFile<'d, K, V> {
     pub fn new(
         file_path: &String,
         key_size: usize,
         value_size: usize,
-    ) -> Result<RecordFile<K, V>, Box<Error>> {
+    ) -> Result<RecordFile<'d, K, V>, Box<Error>> {
         let file = OpenOptions::new()
             .read(true)
             .write(true)
@@ -44,7 +44,7 @@ impl<K: KeyType, V: ValueType> RecordFile<K, V> {
         Ok(false)
     }
 
-    pub fn insert(&mut self, kv: &KeyValuePair<K, V>) -> Result<(), Box<Error>> {
+    pub fn insert(&mut self, kv: &KeyValuePair<'d, K, V>) -> Result<(), Box<Error>> {
         let record_size = self.key_size + self.value_size;
         let mut buff = serialize(&kv)?;
 

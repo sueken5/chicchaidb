@@ -1,20 +1,20 @@
 extern crate serde;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
-pub trait KeyType: Ord + Clone + Serialize {}
-pub trait ValueType: Ord + Clone + Serialize {}
+pub trait KeyType<'d>: Ord + Clone + Serialize + Deserialize<'d> {}
+pub trait ValueType<'d>: Ord + Clone + Serialize + Deserialize<'d> {}
 
-impl<T> KeyType for T where T: Ord + Clone + Serialize {}
+impl<'d, T> KeyType<'d> for T where T: Ord + Clone + Serialize + Deserialize<'d>  {}
 
-impl<T> ValueType for T where T: Ord + Clone + Serialize {}
+impl<'d, T> ValueType<'d>  for T where T: Ord + Clone + Serialize + Deserialize<'d>  {}
 
-#[derive(Serialize)]
-pub struct KeyValuePair<K: KeyType, V: ValueType> {
-    key: K,
-    value: V,
+#[derive(Serialize, Deserialize)]
+pub struct KeyValuePair<'d, K: KeyType<'d>, V: ValueType<'d>> {
+    key: &'d K,
+    value: &'d V,
 }
 
-impl<K: KeyType, V: ValueType> KeyValuePair<K, V> {
+impl<'d, K: KeyType<'d>, V: ValueType<'d>> KeyValuePair<'d, K, V> {
     pub fn new(key: K, value: V) -> Self {
         KeyValuePair { key, value }
     }

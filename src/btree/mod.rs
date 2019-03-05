@@ -9,21 +9,21 @@ mod wal;
 use wal::WAL;
 mod record_file;
 
-pub struct Btree<K: KeyType, V: ValueType> {
+pub struct Btree<'d, K: KeyType<'d>, V: ValueType<'d>> {
     key_size: usize,
     value_size: usize,
-    disk_btree: DiskBtree<K, V>,
-    mem_btree: MemBtree<K, V>,
-    wal: WAL<K, V>,
+    disk_btree: DiskBtree<'d, K, V>,
+    mem_btree: MemBtree<'d, K, V>,
+    wal: WAL<'d, K, V>,
 }
 
-impl<K: KeyType, V: ValueType> Btree<K, V> {
+impl<'d, K: KeyType<'d>, V: ValueType<'d>> Btree<'d, K, V> {
     pub fn new(
         btree_file_path: &String,
         wal_file_path: &String,
         key_size: usize,
         value_size: usize,
-    ) -> Result<Btree<K, V>, Box<Error>> {
+    ) -> Result<Btree<'d, K, V>, Box<Error>> {
         let dt = DiskBtree::<K, V>::new(&btree_file_path, key_size, value_size)?;
         let mt = MemBtree::<K, V>::new()?;
         let wal = WAL::<K, V>::new(&wal_file_path, key_size, value_size)?;

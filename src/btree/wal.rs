@@ -2,16 +2,16 @@ use crate::btree::key_value::{KeyType, KeyValuePair, ValueType};
 use crate::btree::record_file::RecordFile;
 use std::error::Error;
 
-pub struct WAL<K: KeyType, V: ValueType> {
-    file: RecordFile<K, V>,
+pub struct WAL<'d, K: KeyType<'d>, V: ValueType<'d>> {
+    file: RecordFile<'d, K, V>,
 }
 
-impl<K: KeyType, V: ValueType> WAL<K, V> {
+impl<'d, K: KeyType<'d>, V: ValueType<'d>> WAL<'d, K, V> {
     pub fn new(
         file_path: &String,
         key_size: usize,
         value_size: usize,
-    ) -> Result<WAL<K, V>, Box<Error>> {
+    ) -> Result<WAL<'d, K, V>, Box<Error>> {
         let file = RecordFile::<K, V>::new(file_path, key_size, value_size)?;
         Ok(WAL { file })
     }
